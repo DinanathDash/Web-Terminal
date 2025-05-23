@@ -20,7 +20,8 @@ import './macosTerminal.css';
 import './themeColors.css';
 
 // Backend URL
-const BACKEND_URL = 'http://localhost:3001';
+// Use environment variable or fallback to local server during development
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || window.location.origin;
 
 // Initial file structure for the explorer
 const initialFiles = {
@@ -143,10 +144,15 @@ function App() {
   
   // Initialize socket connection
   useEffect(() => {
+    console.log(`Connecting to backend at: ${BACKEND_URL}`);
+    
+    // For Vercel serverless deployment, we need to use the path option
     const newSocket = io(BACKEND_URL, {
       reconnectionDelayMax: 10000,
       reconnection: true,
       reconnectionAttempts: 10,
+      path: '/socket.io',
+      transports: ['websocket', 'polling'],
     });
 
     newSocket.on('connect', () => {

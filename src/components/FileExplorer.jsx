@@ -37,7 +37,8 @@ import { useTheme } from '@mui/material/styles';
 import io from 'socket.io-client';
 
 // Backend URL
-const BACKEND_URL = 'http://localhost:3001';
+// Use environment variable or fallback to local server during development
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || window.location.origin;
 
 function FileExplorer({ files, onFileOpen, setFiles }) {
   const theme = useTheme();
@@ -171,10 +172,13 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
 
     if (['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'c', 'cpp', 'rb', 'go', 'rs'].includes(extension)) {
       return new Promise((resolve) => {
+        console.log(`FileExplorer connecting to: ${BACKEND_URL}`);
         const socket = io(BACKEND_URL, {
           reconnectionDelayMax: 10000,
           reconnection: true,
-          reconnectionAttempts: 3
+          reconnectionAttempts: 3,
+          path: '/socket.io',
+          transports: ['websocket', 'polling']
         });
 
         // Setup all event listeners before emitting
