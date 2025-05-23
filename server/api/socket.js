@@ -56,7 +56,7 @@ const ioHandler = (req, res) => {
     path: '/socket.io',
     addTrailingSlash: false,
     cors: {
-      origin: req.headers.origin || '*',
+      origin: '*',
       methods: ['GET', 'POST'],
       credentials: true
     },
