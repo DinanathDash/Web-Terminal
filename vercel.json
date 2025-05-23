@@ -20,16 +20,13 @@
       "headers": {
         "Access-Control-Allow-Origin": "https://webexec.vercel.app",
         "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Content-Length, Host, Upgrade, Connection",
         "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Max-Age": "86400"
-      },
-      "continue": true
-    },
-    {
-      "src": "/socket.io/[^/]+/websocket",
-      "dest": "server/api/socket.js",
-      "upgrade": true
+        "Access-Control-Max-Age": "86400",
+        "Sec-WebSocket-Protocol": "socket.io",
+        "Connection": "upgrade",
+        "Upgrade": "websocket"
+      }
     },
     {
       "src": "/api/(.*)",
