@@ -1,0 +1,111 @@
+/**
+ * Web Terminal Theme Colors
+ * 
+ * This file contains all color variables used throughout the application.
+ * Dark theme colors based on GitHub Dark Default theme.
+ */
+
+:root {
+  /* Main colors */
+  --bg-default: #0d1117;
+  --bg-paper: #0d1117;
+  --bg-sidebar: #010409;
+  --bg-activity-bar: #010409;
+  --bg-editor: #010409;
+  --bg-editor-group: #010409;
+  --bg-tab: #010409;
+  --bg-active-tab: #0d1117;
+  --bg-terminal: #010409;
+  --bg-header: #010409;
+  --bg-statusbar: #010409;
+
+  /* Text colors */
+  --text-primary: #e6edf3;
+  --text-secondary: #7d8590;
+  --text-disabled: #484f58;
+  --text-hint: #6e7681;
+  --text-header: #e6edf3;
+  --text-statusbar: #e6edf3;
+
+  /* Border colors */
+  --border-main: #30363d;
+  --border-light: #21262d;
+  --border-dark: #484f58;
+  --divider: #21262d;
+
+  /* Action colors */
+  --action-active: rgba(255, 255, 255, 0.7);
+  --action-hover: rgba(177, 186, 196, 0.12);
+  --action-selected: rgba(56, 139, 253, 0.15);
+  --action-disabled: rgba(110, 118, 129, 0.3);
+  --action-disabled-bg: #161b22;
+
+  /* Button colors */
+  --button-primary-bg: #238636;
+  --button-primary-hover: #2ea043;
+  --button-primary-text: #ffffff;
+  --button-secondary-bg: #238636;
+  --button-secondary-hover: #2ea043;
+  --button-secondary-text: #ffffff;
+
+  /* Editor syntax highlighting */
+  --editor-comment: #8b949e;
+  --editor-keyword: #ff7b72;
+  --editor-string: #a5d6ff;
+  --editor-number: #79c0ff;
+  --editor-type: #d2a8ff;
+  --editor-function: #79c0ff;
+  --editor-variable: #c9d1d9;
+  --editor-operator: #ff7b72;
+  --editor-lineHighlight: #161b22;
+  --editor-selection: #264f78;
+
+  /* Terminal colors */
+  --terminal-black: #484f58;
+  --terminal-bright-black: #6e7681;
+  --terminal-red: #ff7b72;
+  --terminal-bright-red: #ffa198;
+  --terminal-green: #3fb950;
+  --terminal-bright-green: #56d364;
+  --terminal-yellow: #d29922;
+  --terminal-bright-yellow: #e3b341;
+  --terminal-blue: #58a6ff;
+  --terminal-bright-blue: #79c0ff;
+  --terminal-magenta: #bc8cff;
+  --terminal-bright-magenta: #d2a8ff;
+  --terminal-cyan: #39c5cf;
+  --terminal-bright-cyan: #56d4dd;
+  --terminal-white: #b1bac4;
+  --terminal-bright-white: #f0f6fc;
+  --terminal-selection: #264f78;
+
+  /* File icons colors */
+  --file-icon-folder: #54aeff;
+  --file-icon-javascript: #f1e05a;
+  --file-icon-typescript: #3178c6;
+  --file-icon-react: #61dafb;
+  --file-icon-html: #e34c26;
+  --file-icon-css: #563d7c;
+  --file-icon-json: #40a0f0;
+  --file-icon-markdown: #1f6feb;
+  --file-icon-python: #3572A5;
+  --file-icon-java: #b07219;
+  --file-icon-ruby: #701516;
+  --file-icon-php: #4F5D95;
+  --file-icon-cpp: #f34b7d;
+  --file-icon-go: #00ADD8;
+  --file-icon-rust: #dea584;
+
+  /* Common spacing variables */
+  --spacing-xxs: 2px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+
+  /* Common border radius */
+  --border-radius-sm: 3px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 8px;
+}
