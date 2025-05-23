@@ -23,27 +23,47 @@ if (!fs.existsSync(TEMP_DIR)) {
 
 const clientPreferences = new Map();
 
+// Handle CORS preflight requests
+const handleCors = (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    res.statusCode = 204;
+    res.end();
+    return true;
+  }
+  return false;
+};
+
 // Create an instance of Socket.IO server
 const ioHandler = (req, res) => {
+  // Handle CORS preflight
+  if (handleCors(req, res)) return;
+
   // Return early if socket.io instance already exists
   if (res.socket.server.io) {
-    console.log('Socket.IO is already running');
     res.end();
     return;
   }
 
   console.log('Initializing Socket.IO server...');
+
+  // Initialize Socket.IO
   const io = new Server(res.socket.server, {
     path: '/socket.io',
     addTrailingSlash: false,
     cors: {
-      origin: ['https://webexec.vercel.app', 'http://localhost:5173'],
-      methods: ['GET', 'POST', 'OPTIONS'],
-      credentials: true,
-      allowedHeaders: ['Content-Type', 'Authorization']
+      origin: req.headers.origin || '*',
+      methods: ['GET', 'POST'],
+      credentials: true
     },
     transports: ['polling', 'websocket'],
     allowEIO3: true,
+    perMessageDeflate: false,
+    maxHttpBufferSize: 1e6,
     pingTimeout: 60000,
     pingInterval: 25000
   });

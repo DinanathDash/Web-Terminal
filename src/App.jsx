@@ -149,15 +149,15 @@ function App() {
     // For Vercel serverless deployment configuration
     const newSocket = io(BACKEND_URL, {
       path: '/socket.io',
-      reconnectionDelayMax: 10000,
+      transports: ['polling'], // Start with polling only
+      reconnectionDelayMax: 5000,
       reconnection: true,
-      reconnectionAttempts: 5,
-      transports: ['polling', 'websocket'], // Try polling first, then upgrade to websocket
-      upgrade: true,
-      rememberUpgrade: true,
-      timeout: 10000,
-      forceNew: true,
-      withCredentials: true
+      reconnectionAttempts: 10,
+      timeout: 20000,
+      auth: {
+        serverOffset: new Date().getTimezoneOffset()
+      },
+      forceNew: true
     });
 
     newSocket.on('connect', () => {
