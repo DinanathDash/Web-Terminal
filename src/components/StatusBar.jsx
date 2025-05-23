@@ -97,14 +97,15 @@ const StatusBar = ({ currentFile, language }) => {
   return (
     <Box sx={{ 
       display: 'flex',
-      height: 22,
+      height: { xs: 24, sm: 22 },
       borderTop: '1px solid',
       borderColor: 'rgba(51, 51, 51, 1)',
       bgcolor: '#080E12',
       color: '#FFFFFF',
-      fontSize: '12px',
+      fontSize: { xs: '11px', sm: '12px' },
       position: 'relative',
-      zIndex: 10
+      zIndex: 10,
+      overflow: 'hidden'
     }}>
       {/* Left status items */}
       <Box sx={{ 

@@ -143,6 +143,12 @@ const theme = {
             backgroundColor: 'rgba(177, 186, 196, 0.12)',
             color: '#e6edf3',
           },
+          '@media (max-width: 600px)': {
+            padding: '8px',
+            '& .MuiSvgIcon-root': {
+              fontSize: '1.1rem',
+            },
+          },
         },
       },
     },
@@ -212,7 +218,12 @@ const theme = {
             '&.Mui-focused': {
               color: '#58a6ff',
             }
-          }
+          },
+          '@media (max-width: 600px)': {
+            '& .MuiInputBase-root': {
+              fontSize: '0.8rem',
+            },
+          },
         }
       }
     },
@@ -267,6 +278,15 @@ const theme = {
         }
       }
     },
+    MuiListItemIcon: {
+      styleOverrides: {
+        root: {
+          '@media (max-width: 600px)': {
+            minWidth: '32px',
+          },
+        },
+      },
+    },
     MuiMenu: {
       styleOverrides: {
         paper: {
@@ -274,6 +294,21 @@ const theme = {
           boxShadow: '0 0 0 1px #30363d, 0 4px 8px #010409',
           borderRadius: '6px',
           border: '1px solid #30363d',
+        }
+      }
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          boxShadow: 'none',
+          backgroundImage: 'none',
+          borderRadius: 0,
+          '&::before': {
+            display: 'none'
+          },
+          '&::after': {
+            display: 'none'
+          }
         }
       }
     },

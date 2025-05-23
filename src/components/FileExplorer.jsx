@@ -10,11 +10,11 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import DescriptionIcon from '@mui/icons-material/Description';
 import CodeIcon from '@mui/icons-material/Code';
-import { 
-  DiJavascript1, DiPython, DiHtml5, DiCss3, 
+import {
+  DiJavascript1, DiPython, DiHtml5, DiCss3,
   DiReact, DiMarkdown, DiCode, DiJava
 } from 'react-icons/di';
-import { 
+import {
   SiTypescript, SiJson, SiYaml, SiGit
 } from 'react-icons/si';
 import Collapse from '@mui/material/Collapse';
@@ -43,97 +43,97 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || window.location.origin;
 function FileExplorer({ files, onFileOpen, setFiles }) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
-  
+
   // State for expanded folders
   const [expanded, setExpanded] = useState({});
-  
+
   // State for context menu
   const [contextMenu, setContextMenu] = useState(null);
-  
+
   // State for new file/folder dialog
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState('file'); // 'file' or 'folder'
   const [newItemName, setNewItemName] = useState('');
   const [currentPath, setCurrentPath] = useState('');
-  
+
   // State for add file/folder menu
   const [addMenuAnchor, setAddMenuAnchor] = useState(null);
-  
+
   // File extensions to icon mappings with more VS Code-like styling
   const getFileIcon = (filename) => {
     const extension = filename.split('.').pop().toLowerCase();
     let iconSize = '1.25rem';
-    
+
     // Map file extensions to appropriate icons and colors
     switch (extension) {
       // JavaScript family
       case 'js':
-        return <DiJavascript1 size={iconSize} color="#F0DB4F" />;
+        return <DiJavascript1 size={iconSize} color="#FFD700" />;
       case 'jsx':
-        return <DiReact size={iconSize} color="#61DAFB" />;
+        return <DiReact size={iconSize} color="#00D8FF" />;
       case 'ts':
-        return <SiTypescript size={iconSize} color="#3178C6" />;
+        return <SiTypescript size={iconSize} color="#007ACC" />;
       case 'tsx':
         return (
           <Box sx={{ position: 'relative' }}>
-            <SiTypescript size={iconSize} color="#3178C6" />
+            <SiTypescript size={iconSize} color="#007ACC" />
             <Box sx={{ position: 'absolute', right: -4, bottom: -4, fontSize: '0.5rem' }}>
-              <DiReact size="0.7rem" color="#61DAFB" />
+              <DiReact size="0.7rem" color="#00D8FF" />
             </Box>
           </Box>
         );
-      
+
       // Web files
       case 'html':
-        return <DiHtml5 size={iconSize} color="#E44D26" />;
+        return <DiHtml5 size={iconSize} color="#FF5722" />;
       case 'css':
-        return <DiCss3 size={iconSize} color="#264DE4" />;
-      
+        return <DiCss3 size={iconSize} color="#1976D2" />;
+
       // Config files
       case 'json':
-        return <SiJson size={iconSize} color="#F5871F" />;
+        return <SiJson size={iconSize} color="#FF9800" />;
       case 'yml':
       case 'yaml':
-        return <SiYaml size={iconSize} color="#CBCB41" />;
-      
+        return <SiYaml size={iconSize} color="#FDD835" />;
+
       // Python and Java
       case 'py':
-        return <DiPython size={iconSize} color="#3776AB" />;
+        return <DiPython size={iconSize} color="#4CAF50" />;
       case 'java':
-        return <DiJava size={iconSize} color="#007396" />;
+        return <DiJava size={iconSize} color="#F44336" />;
       case 'c':
-        return <DiCode size={iconSize} color="#A8B9CC" />;
+        return <DiCode size={iconSize} color="#2196F3" />;
       case 'cpp':
-        return <DiCode size={iconSize} color="#6295CB" />;
+        return <DiCode size={iconSize} color="#00BCD4" />;
       // Document files
       case 'md':
-        return <DiMarkdown size={iconSize} color="#9AC6E0" />;
-      
+        return <DiMarkdown size={iconSize} color="#2196F3" />;
+
       // Config and System files
       case 'gitignore':
         return <SiGit size={iconSize} color="#F05033" />;
-      
+
       // Default file icons by category
       default:
         // Text files
         if (['txt', 'log', 'env', 'ini', 'conf'].includes(extension)) {
-          return <DescriptionIcon sx={{ fontSize: iconSize, color: '#8F8F8F' }} />;
+          return <DescriptionIcon sx={{ fontSize: iconSize, color: '#FF6B35' }} />;
         }
         // Image files 
         else if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'webp'].includes(extension)) {
-          return <InsertDriveFileIcon sx={{ fontSize: iconSize, color: '#FFB13B' }} />;
+          return <InsertDriveFileIcon sx={{ fontSize: iconSize, color: '#FF1744' }} />;
         }
         // Code files that don't have specific icons
         else if (['jsx', 'tsx', 'mjs', 'cjs'].includes(extension)) {
-          return <DiCode size={iconSize} color="#61DAFB" />;
+          return <DiCode size={iconSize} color="#00E676" />;
         }
         // Any other file
         else {
-          return <DiCode size={iconSize} color="#8F8F8F" />;
+          return <DiCode size={iconSize} color="#9C27B0" />;
         }
     }
   };
-  
+
   // Toggle folder expanded state
   const handleToggleFolder = (path) => {
     setExpanded({
@@ -141,17 +141,17 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
       [path]: !expanded[path]
     });
   };
-  
+
   // Handle opening add menu
   const handleAddMenuOpen = (event) => {
     setAddMenuAnchor(event.currentTarget);
   };
-  
+
   // Handle closing add menu
   const handleAddMenuClose = () => {
     setAddMenuAnchor(null);
   };
-  
+
   // Open dialog for new file or folder
   const handleNewItem = (type, path = '') => {
     setDialogType(type);
@@ -160,12 +160,12 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
     setDialogOpen(true);
     handleAddMenuClose();
   };
-  
+
   // Handle dialog close
   const handleDialogClose = () => {
     setDialogOpen(false);
   };
-  
+
   // Helper function to get the default content for a file based on extension
   const getDefaultContent = (filename) => {
     const extension = filename.split('.').pop().toLowerCase();
@@ -219,7 +219,7 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
   // Basic fallback templates
   const getBasicTemplate = (filename) => {
     const extension = filename.split('.').pop().toLowerCase();
-    
+
     switch (extension) {
       case 'js':
       case 'jsx':
@@ -252,7 +252,7 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
     } else {
       // For files, get content with templates
       const content = await getDefaultContent(itemName);
-      
+
       return {
         type: 'file',
         content: content || '' // Ensure we have content even if template fails
@@ -266,18 +266,24 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
 
     const newItem = await createSafeItem(newItemName, dialogType);
     const path = currentPath ? `${currentPath}/${newItemName}` : newItemName;
-    
-    // Update file structure
-    const updatedFiles = { ...files };
+
+    // Create a deep copy of the files structure
+    const updatedFiles = JSON.parse(JSON.stringify(files));
     let current = updatedFiles;
-    
+
     if (currentPath) {
-      const parts = currentPath.split('/');
+      const parts = currentPath.split('/').filter(Boolean);
       for (const part of parts) {
+        if (!current[part]) {
+          current[part] = { type: 'folder', children: {} };
+        }
+        if (!current[part].children) {
+          current[part].children = {};
+        }
         current = current[part].children;
       }
     }
-    
+
     current[newItemName] = newItem;
     setFiles(updatedFiles);
 
@@ -297,14 +303,14 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
       const currentPath = path ? `${path}/${key}` : `/${key}`;
       const isExpanded = expanded[currentPath] || false;
       const indentationLevel = path.split('/').filter(Boolean).length;
-      
+
       if (value.type === 'folder') {
         return (
           <React.Fragment key={currentPath}>
-            <ListItemButton 
+            <ListItemButton
               onClick={() => handleToggleFolder(currentPath)}
               disableRipple
-              sx={{ 
+              sx={{
                 pl: indentationLevel * 1.5 + 0.5,
                 py: 0.25,
                 minHeight: 24,
@@ -324,40 +330,40 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
               }}
             >
               {/* VS Code-like folder expand/collapse icon */}
-              <Box sx={{ 
-                minWidth: 16, 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center' 
+              <Box sx={{
+                minWidth: 16,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
-                {isExpanded ? 
-                  <ExpandMoreIcon fontSize="small" sx={{ fontSize: '1rem', opacity: 0.7 }} /> : 
+                {isExpanded ?
+                  <ExpandMoreIcon fontSize="small" sx={{ fontSize: '1rem', opacity: 0.7 }} /> :
                   <ChevronRightIcon fontSize="small" sx={{ fontSize: '1rem', opacity: 0.7 }} />}
               </Box>
-              
+
               {/* Folder Icon - VS Code style */}
-              <ListItemIcon sx={{ 
-                minWidth: 28, 
+              <ListItemIcon sx={{
+                minWidth: 28,
                 ml: 0.5,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                {isExpanded ? 
-                  <FolderOpenIcon sx={{ 
+                {isExpanded ?
+                  <FolderOpenIcon sx={{
                     fontSize: '1.25rem',
-                    color: theme.palette.mode === 'dark' ? '#DCAD5C' : '#DCAB53' 
-                  }} /> : 
-                  <FolderIcon sx={{ 
+                    color: theme.palette.mode === 'dark' ? '#B8B8B8' : '#A0A0A0'
+                  }} /> :
+                  <FolderIcon sx={{
                     fontSize: '1.25rem',
-                    color: theme.palette.mode === 'dark' ? '#E8AB53' : '#DCB67A' 
+                    color: theme.palette.mode === 'dark' ? '#B8B8B8' : '#A0A0A0'
                   }} />}
               </ListItemIcon>
-              
+
               {/* Folder name */}
-              <ListItemText 
-                primary={key} 
-                primaryTypographyProps={{ 
+              <ListItemText
+                primary={key}
+                primaryTypographyProps={{
                   variant: 'body2',
                   sx: {
                     fontSize: '0.85rem',
@@ -367,9 +373,9 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
                     overflow: 'hidden',
                     textOverflow: 'ellipsis'
                   }
-                }} 
+                }}
               />
-              
+
               {/* Add file/folder button that shows on hover */}
               <IconButton
                 size="small"
@@ -391,22 +397,29 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
                 <AddIcon sx={{ fontSize: '0.85rem' }} />
               </IconButton>
             </ListItemButton>
-            
+
             {/* Collapse children with VS Code-like animation */}
             <Collapse in={isExpanded} timeout={100} unmountOnExit>
-              <List component="div" disablePadding sx={{ ml: 0.5 }}>
-                {renderTree(value.children, currentPath)}
+              <List component="div" disablePadding>
+                <Box sx={{
+                  '& > .MuiListItemButton-root': {
+                    paddingLeft: theme => `${theme.spacing(2)}`,
+                    borderLeft: '30px transparent solid',
+                  }
+                }}>
+                  {renderTree(value.children, currentPath)}
+                </Box>
               </List>
             </Collapse>
           </React.Fragment>
         );
       } else {
         return (
-          <ListItemButton 
+          <ListItemButton
             key={currentPath}
             onClick={() => onFileOpen(currentPath)}
             disableRipple
-            sx={{ 
+            sx={{
               pl: indentationLevel * 1.5 + 2.5,
               py: 0.25,
               minHeight: 24,
@@ -421,19 +434,19 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
             }}
           >
             {/* File icon with VS Code-like styling */}
-            <ListItemIcon sx={{ 
-              minWidth: 28, 
+            <ListItemIcon sx={{
+              minWidth: 28,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
             }}>
               {getFileIcon(key)}
             </ListItemIcon>
-            
+
             {/* File name */}
-            <ListItemText 
-              primary={key} 
-              primaryTypographyProps={{ 
+            <ListItemText
+              primary={key}
+              primaryTypographyProps={{
                 variant: 'body2',
                 sx: {
                   fontSize: '0.85rem',
@@ -443,14 +456,14 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
                   overflow: 'hidden',
                   textOverflow: 'ellipsis'
                 }
-              }} 
+              }}
             />
           </ListItemButton>
         );
       }
     });
   };
-  
+
   return (
     <Box
       sx={{
@@ -492,24 +505,24 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
       }}
     >
       {/* VS Code-like Explorer header with collapsible sections */}
-      <Box sx={{ 
-        display: 'flex', 
+      <Box sx={{
+        display: 'flex',
         flexDirection: 'column',
         width: '100%',
       }}>
         {/* Explorer header */}
         <Box sx={{
-          display: 'flex', 
-          justifyContent: 'space-between', 
+          display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
           px: 2,
           py: 1,
           borderBottom: '1px solid',
           borderColor: 'divider',
         }}>
-          <Typography 
-            variant="subtitle2" 
-            sx={{ 
+          <Typography
+            variant="subtitle2"
+            sx={{
               fontWeight: 600,
               fontSize: '0.7rem',
               letterSpacing: '0.05rem',
@@ -522,8 +535,8 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Tooltip title="New File">
-              <IconButton 
-                size="small" 
+              <IconButton
+                size="small"
                 onClick={() => handleNewItem('file')}
                 sx={{
                   p: 0.5,
@@ -536,8 +549,8 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
               </IconButton>
             </Tooltip>
             <Tooltip title="New Folder">
-              <IconButton 
-                size="small" 
+              <IconButton
+                size="small"
                 onClick={() => handleNewItem('folder')}
                 sx={{
                   p: 0.5,
@@ -550,8 +563,8 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
               </IconButton>
             </Tooltip>
             <Tooltip title="Refresh Explorer">
-              <IconButton 
-                size="small" 
+              <IconButton
+                size="small"
                 sx={{
                   p: 0.5,
                   '&:hover': {
@@ -559,7 +572,7 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
                   }
                 }}
               >
-                <Box component="span" sx={{ 
+                <Box component="span" sx={{
                   fontSize: '1rem',
                   display: 'flex',
                   alignItems: 'center',
@@ -570,14 +583,14 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
           </Box>
         </Box>
       </Box>
-      
+
       {/* File tree with VS Code styling */}
       <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
         <List component="nav" aria-label="file explorer" sx={{ py: 0 }}>
           {renderTree(files)}
         </List>
       </Box>
-      
+
       {/* Add Menu */}
       <Menu
         anchorEl={addMenuAnchor}
@@ -587,8 +600,8 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
           sx: {
             mt: 1,
             minWidth: 180,
-            boxShadow: theme => theme.palette.mode === 'dark' 
-              ? '0 4px 20px rgba(0,0,0,0.5)' 
+            boxShadow: theme => theme.palette.mode === 'dark'
+              ? '0 4px 20px rgba(0,0,0,0.5)'
               : '0 4px 20px rgba(0,0,0,0.15)',
             borderRadius: 1,
           }
@@ -607,7 +620,7 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
           <ListItemText>New Folder</ListItemText>
         </MenuItem>
       </Menu>
-      
+
       {/* New File/Folder Dialog */}
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
         <DialogTitle>
@@ -630,8 +643,8 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDialogClose}>Cancel</Button>
-          <Button 
-            onClick={handleCreateItem} 
+          <Button
+            onClick={handleCreateItem}
             variant="contained"
             disabled={!newItemName.trim()}
           >

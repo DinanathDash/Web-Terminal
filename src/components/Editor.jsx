@@ -78,7 +78,11 @@ function CodeEditor({ code, language, onCodeChange, onRun, onStop, isRunning }) 
       sx={{
         flex: 1,
         position: 'relative',
-        backgroundColor: '#010409'
+        backgroundColor: '#010409',
+        '& .monaco-editor': {
+          border: 'none !important',
+          outline: 'none !important', // Remove focus outline
+        },
       }}
     >
       <Editor
@@ -98,8 +102,14 @@ function CodeEditor({ code, language, onCodeChange, onRun, onStop, isRunning }) 
           scrollbar: {
             vertical: 'visible',
             horizontal: 'visible',
-            verticalScrollbarSize: 14,
-            horizontalScrollbarSize: 14
+            verticalScrollbarSize: 4,
+            horizontalScrollbarSize: 10,
+            useShadows: true,
+            verticalHasArrows: false,
+            horizontalHasArrows: false,
+            arrowSize: 0,
+            verticalScrollbarBorder: 0,
+            horizontalScrollbarBorder: 0
           }
         }}
       />

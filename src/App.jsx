@@ -131,13 +131,14 @@ function App() {
   
   // VS Code UI state
   const [activeSearch, setActiveSearch] = useState('');
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [mobileExplorerOpen, setMobileExplorerOpen] = useState(false);
 
   // Socket connection
   const [socket, setSocket] = useState(null);
   const [serverConnected, setServerConnected] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   // Get theme
   const theme = getVSCodeTheme();
@@ -205,6 +206,19 @@ function App() {
   useEffect(() => {
     applyThemeClass();
   }, []);
+
+  // Handle mobile explorer toggle
+  const handleMobileExplorerToggle = () => {
+    setMobileExplorerOpen(!mobileExplorerOpen);
+  };
+
+  useEffect(() => {
+    if (currentFile) {
+      setMobileExplorerOpen(false);
+    } else {
+      setMobileExplorerOpen(true);
+    }
+  }, [currentFile]);
 
   // Normalize file paths
   const normalizePath = (path) => {
@@ -340,46 +354,11 @@ function App() {
 
   // Handle terminal commands
   const handleTerminalCommand = (command) => {
-    // Ignore internal commands that start with _
-    if (command.startsWith('_')) return;
+    if (!command || command.startsWith('_')) return;
 
-    if (command === 'help') {
-      setOutput({
-        output: `Available commands:\n
-  run        Execute the current code
-  stop       Stop execution 
-  clear      Clear terminal output
-  cls        Clear terminal output (alias for clear)
-  shortcuts  Show keyboard shortcuts
-  help       Show this help message
-`,
-        error: false
-      });
-      return;
+    if (command === 'reconnect' && socket) {
+      socket.connect();
     }
-    
-    if (command === 'clear' || command === 'cls') {
-      setOutput({
-        output: '\f',
-        error: false
-      });
-      return;
-    }
-    
-    if (command === 'run') {
-      handleRunCode();
-      return;
-    }
-    
-    if (command === 'stop') {
-      handleStopExecution();
-      return;
-    }
-
-    setOutput({
-      output: `Command not recognized: ${command}\n\nType help for available commands.\n`,
-      error: true
-    });
   };
 
   // Handle file selection
@@ -439,29 +418,57 @@ function App() {
         height: '100vh',
         bgcolor: 'background.default'
       }}>
-        <Header onSave={handleSaveFile} />
+        <Header onSave={handleSaveFile} onMobileExplorerToggle={handleMobileExplorerToggle} />
         
         <Box sx={{ 
           display: 'flex', 
           flexGrow: 1,
-          overflow: 'hidden'
+          overflow: 'hidden',
+          position: 'relative'
         }}>
           <Box sx={{ 
-            width: 240, 
-            flexShrink: 0,
+            width: { xs: '50%', sm: 240 },
+            position: { xs: 'absolute', sm: 'relative' },
             display: 'flex',
+            flexShrink: 0,
             flexDirection: 'column',
             overflow: 'hidden',
             borderRight: 1,
             borderColor: 'divider',
-            bgcolor: theme.palette.background.sidebar
+            bgcolor: theme.palette.background.sidebar,
+            zIndex: 10,
+            transform: {
+              xs: mobileExplorerOpen ? 'translateX(0)' : 'translateX(-100%)',
+              sm: 'translateX(0)'
+            },
+            transition: 'transform 0.3s ease-in-out',
+            height: '100%',
+            left: 0
           }}>
             <FileExplorer 
               files={files}
               onFileOpen={handleFileSelect}
               setFiles={setFiles}
+              onClose={handleMobileExplorerToggle}
             />
           </Box>
+          
+          {/* Backdrop for mobile */}
+          {mobileExplorerOpen && (
+            <Box
+              onClick={handleMobileExplorerToggle}
+              sx={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                bgcolor: 'rgba(0, 0, 0, 0.5)',
+                zIndex: 9,
+                display: { sm: 'none' }
+              }}
+            />
+          )}
           
           <Box sx={{ 
             flexGrow: 1, 
@@ -482,7 +489,7 @@ function App() {
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
-              minHeight: 0
+              minHeight: 0,
             }}>
               <CodeEditor 
                 code={code}
@@ -497,14 +504,15 @@ function App() {
             <Paper
               elevation={0}
               sx={{
-                height: '35%',
+                height: { xs: '45%', sm: '35%' },
                 borderTop: 1,
                 borderColor: 'divider',
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
                 bgcolor: theme.palette.background.terminal,
-                position: 'relative'
+                position: 'relative',
+                borderRadius: 0,
               }}
             >
               <Terminal 

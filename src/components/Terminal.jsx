@@ -42,20 +42,17 @@ const copyToClipboard = (text) => {
 const isWindows = navigator.platform.toLowerCase().includes('win');
 const isMac = navigator.platform.toLowerCase().includes('mac');
 const PLATFORM_TEXT = isWindows ? 'Windows' : (isMac ? 'macOS' : 'Linux');
-const CTRL_KEY_TEXT = isMac ? '⌘' : 'Ctrl';
-
-// Command key help text for different platforms
+const CTRL_KEY_TEXT = isMac ? '⌘' : 'Ctrl';  // Basic clipboard shortcuts
 const KEYBOARD_SHORTCUTS = {
   COPY: isMac ? '⌘+C' : 'Ctrl+Shift+C',
-  PASTE: isMac ? '⌘+V' : 'Ctrl+Shift+V',
-  STOP: 'Ctrl+C', 
-  CLEAR: isMac ? '⌘+K' : 'Ctrl+L'
+  PASTE: isMac ? '⌘+V' : 'Ctrl+Shift+V'
 };
 
 function Terminal({ output, onCommand, isRunning, isConnected = true, language = 'javascript' }) {
   const terminalRef = useRef(null);
   const xtermRef = useRef(null);
   const fitAddonRef = useRef(null);
+  const isInitialMount = useRef(true);  // Moved to top level
   const [isTerminalReady, setIsTerminalReady] = useState(false);
   const [inputBuffer, setInputBuffer] = useState('');
   const [isReconnecting, setIsReconnecting] = useState(false);
@@ -314,27 +311,16 @@ function Terminal({ output, onCommand, isRunning, isConnected = true, language =
     );
   };
 
-  // Add keyboard shortcuts helper
-  const showKeyboardHelp = useCallback(() => {
+  // Show terminal help content
+  const showHelp = useCallback(() => {
     if (!xtermRef.current || !isTerminalReady) return;
     
-    xtermRef.current.writeln('\r\n\x1b[36m=== Keyboard Shortcuts (' + PLATFORM_TEXT + ') ===\x1b[0m');
+    xtermRef.current.writeln('\r\n\x1b[36m=== Terminal Controls ===\x1b[0m');
     xtermRef.current.writeln('\x1b[33mCopy text:\x1b[0m ' + KEYBOARD_SHORTCUTS.COPY);
     xtermRef.current.writeln('\x1b[33mPaste text:\x1b[0m ' + KEYBOARD_SHORTCUTS.PASTE);
-    xtermRef.current.writeln('\x1b[33mStop execution:\x1b[0m ' + KEYBOARD_SHORTCUTS.STOP);
-    xtermRef.current.writeln('\x1b[33mClear terminal:\x1b[0m ' + KEYBOARD_SHORTCUTS.CLEAR);
-    xtermRef.current.writeln('\x1b[36m===================================\x1b[0m\r\n');
+    xtermRef.current.writeln('\x1b[36m====================\x1b[0m\r\n');
     xtermRef.current.write(promptRef.current);
   }, [isTerminalReady]);
-  
-  // Add extended command handling
-  const handleExtendedCommands = useCallback((command) => {
-    if (command === 'shortcuts' || command === 'help keys') {
-      showKeyboardHelp();
-      return true; // Command was handled
-    }
-    return false; // Command was not handled
-  }, [showKeyboardHelp]);
 
   // Register handlers only if they are needed
   useEffect(() => {
@@ -348,21 +334,10 @@ function Terminal({ output, onCommand, isRunning, isConnected = true, language =
     }
   }, [handlePackageEvents]);
 
-  // Initialize the terminal keyboard handler
+  // Initialize terminal focus and clipboard handlers
   const terminalKeys = useTerminalKeys({
-    onCommand: (cmd) => {
-      // First try to handle with our internal extended commands
-      const wasHandled = handleExtendedCommands(cmd);
-      
-      // If not handled internally, pass to parent command handler
-      if (!wasHandled && typeof onCommand === 'function') {
-        onCommand(cmd);
-      }
-    },
     terminalRef,
-    xtermRef,
-    isRunning,
-    prompt: promptRef.current
+    xtermRef
   });
 
   // Update the prompt when it changes
@@ -397,11 +372,9 @@ function Terminal({ output, onCommand, isRunning, isConnected = true, language =
     xtermRef.current.open(terminalRef.current);
     fitAddonRef.current.fit();
     
-    // Initialize terminal with welcome message and prompt
-    xtermRef.current.writeln('Welcome to Web Terminal');
-    xtermRef.current.writeln('Type "help" for available commands or "shortcuts" for keyboard shortcuts');
-    xtermRef.current.writeln('');
-    xtermRef.current.write(promptRef.current);
+    // Initialize terminal with welcome message
+    xtermRef.current.writeln('\r\nWelcome to Web Terminal\r\n');
+    // Don't write any completion messages on initial load
 
     // Handle key input with enhanced platform compatibility
     xtermRef.current.onKey(e => {
@@ -650,22 +623,29 @@ function Terminal({ output, onCommand, isRunning, isConnected = true, language =
   // Display running indicator in terminal
   useEffect(() => {
     if (xtermRef.current && isTerminalReady) {
+      if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+      }
+
       if (isRunning) {
-        const langDisplay = currentLanguageRef.current || 'code';
-        xtermRef.current.write(`\r\n\x1b[33m[Execution started]\x1b[0m\r\n`);
-        xtermRef.current.write('\x1b[2m(Press Ctrl+C to stop)\x1b[0m\r\n\r\n');
-      } else if (isRunning === false) { // explicitly check for false to avoid triggering on initial render
-        xtermRef.current.write('\r\n\x1b[32m[Execution completed]\x1b[0m\r\n\r\n');
-        xtermRef.current.write(promptRef.current);
-        
-        // Reset package status on execution completion
-        setPackageStatus(prev => ({
-          ...prev,
-          active: false,
-          status: 'idle',
-          packages: [],
-          progress: 0
-        }));
+        xtermRef.current.write('\r\n\x1b[33m[Execution started]\x1b[0m\r\n');
+        xtermRef.current.write('\x1b[2m(Press Ctrl+C to stop)\x1b[0m\r\n');
+      } else if (isRunning === false) {
+        // Only show completion message if we were actually running something
+        if (!isInitialMount.current) {
+          xtermRef.current.write('\r\n\x1b[32m[Execution completed]\x1b[0m\r\n\r\n');
+          xtermRef.current.write(promptRef.current);
+          
+          // Reset package status on execution completion
+          setPackageStatus(prev => ({
+            ...prev,
+            active: false,
+            status: 'idle',
+            packages: [],
+            progress: 0
+          }));
+        }
       }
     }
   }, [isRunning, isTerminalReady]);

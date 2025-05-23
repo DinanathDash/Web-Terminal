@@ -67,20 +67,18 @@ export default function useTerminalKeys(options = {}) {
     // Optional logging for debugging
     // console.log('Terminal key:', key, 'Code:', keyCode);
     
-    // Handle specific keys
-    if (key === 'Enter' || keyCode === 13) {
-      handleEnterKey();
-    } else if (key === 'Backspace' || key === 'Delete' || keyCode === 8 || keyCode === 46) {
-      handleDeleteKey();
-    } else if ((ev.ctrlKey || ev.metaKey) && (key === 'c' || key === 'C')) {
-      if (isRunning && typeof onCommand === 'function') {
-        onCommand('stop');
+    // Handle clipboard operations
+    if ((ev.ctrlKey || ev.metaKey) && (key === 'c' || key === 'C')) {
+      const selection = document.getSelection().toString();
+      if (selection) {
+        navigator.clipboard.writeText(selection);
       }
-      xtermRef.current.write('^C\r\n');
-      xtermRef.current.write(promptRef.current);
-      inputBufferRef.current = '';
-    } else if (!ev.ctrlKey && !ev.altKey && !ev.metaKey && key.length === 1) {
-      handleTextInput(key);
+    } else if ((ev.ctrlKey || ev.metaKey) && (key === 'v' || key === 'V')) {
+      navigator.clipboard.readText().then(text => {
+        if (text && xtermRef.current) {
+          xtermRef.current.write(text);
+        }
+      });
     }
   }, [handleEnterKey, handleDeleteKey, handleTextInput, isRunning, onCommand, xtermRef]);
   

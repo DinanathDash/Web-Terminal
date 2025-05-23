@@ -154,3 +154,57 @@
 ::selection {
   background-color: rgba(134, 198, 247, 0.3);
 }
+
+/* Mobile responsive styles */
+@media (max-width: 600px) {
+  /* Adjust scrollbars for touch devices */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  /* Optimize touch targets */
+  .editor-tab {
+    min-height: 40px;
+    padding: 0 8px;
+  }
+
+  .editor-tab-close {
+    padding: 8px;
+  }
+
+  /* Adjust file explorer for mobile */
+  .file-explorer-item {
+    min-height: 32px;
+    padding: 4px 8px;
+  }
+
+  /* Improve touch targets in file list */
+  .MuiListItemButton-root {
+    min-height: 32px !important;
+    padding: 4px 8px !important;
+  }
+}
+
+/* Tablet responsive styles */
+@media (min-width: 601px) and (max-width: 960px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .editor-tab {
+    min-height: 36px;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+  .editor-tab-close {
+    opacity: 1;
+  }
+
+  .MuiIconButton-root {
+    opacity: 1 !important;
+  }
+}
