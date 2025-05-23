@@ -174,11 +174,16 @@ function FileExplorer({ files, onFileOpen, setFiles }) {
       return new Promise((resolve) => {
         console.log(`FileExplorer connecting to: ${BACKEND_URL}`);
         const socket = io(BACKEND_URL, {
+          path: '/socket.io',
           reconnectionDelayMax: 10000,
           reconnection: true,
           reconnectionAttempts: 3,
-          path: '/socket.io',
-          transports: ['websocket', 'polling']
+          transports: ['polling', 'websocket'],
+          upgrade: true,
+          rememberUpgrade: true,
+          timeout: 10000,
+          forceNew: true,
+          withCredentials: true
         });
 
         // Setup all event listeners before emitting

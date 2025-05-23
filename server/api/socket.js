@@ -25,20 +25,27 @@ const clientPreferences = new Map();
 
 // Create an instance of Socket.IO server
 const ioHandler = (req, res) => {
+  // Return early if socket.io instance already exists
   if (res.socket.server.io) {
-    // If socket.io was already initialized
+    console.log('Socket.IO is already running');
     res.end();
     return;
   }
 
-  const httpServer = createServer();
-  const io = new Server(httpServer, {
+  console.log('Initializing Socket.IO server...');
+  const io = new Server(res.socket.server, {
+    path: '/socket.io',
+    addTrailingSlash: false,
     cors: {
-      origin: ['https://webexec.vercel.app', 'http://localhost:5173'], 
-      methods: ['GET', 'POST'],
-      credentials: true
+      origin: ['https://webexec.vercel.app', 'http://localhost:5173'],
+      methods: ['GET', 'POST', 'OPTIONS'],
+      credentials: true,
+      allowedHeaders: ['Content-Type', 'Authorization']
     },
-    path: '/socket.io'
+    transports: ['polling', 'websocket'],
+    allowEIO3: true,
+    pingTimeout: 60000,
+    pingInterval: 25000
   });
 
   // Socket.IO logic - simplified for serverless
@@ -60,24 +67,41 @@ const ioHandler = (req, res) => {
       console.log(`Received code execution request for language: ${language}`);
       
       try {
+        // Create a temp directory for this socket
+        const userTempDir = path.join(TEMP_DIR, socket.id);
+        if (!fs.existsSync(userTempDir)) {
+          fs.mkdirSync(userTempDir, { recursive: true });
+        }
+
         // Create a temp file for the code
         const filename = `code_${Date.now()}.${language === 'javascript' ? 'js' : language === 'python' ? 'py' : 'txt'}`;
-        const filepath = path.join(TEMP_DIR, filename);
+        const filepath = path.join(userTempDir, filename);
         
         // Write code to file
         fs.writeFileSync(filepath, code);
         
         // Execute based on language
         let output = '';
+        const execOptions = {
+          timeout: 10000, // 10 second timeout
+          cwd: path.dirname(filepath), // Run in the temp directory
+          env: { ...process.env, NODE_ENV: 'production' }, // Safe environment
+          maxBuffer: 1024 * 1024 // 1MB output limit
+        };
         
-        if (language === 'javascript') {
-          const result = await execPromise(`node ${filepath}`, { timeout: 10000 });
-          output = result.stdout + (result.stderr ? `\nError: ${result.stderr}` : '');
-        } else if (language === 'python') {
-          const result = await execPromise(`python ${filepath}`, { timeout: 10000 });
-          output = result.stdout + (result.stderr ? `\nError: ${result.stderr}` : '');
-        } else {
-          output = 'Language not supported in serverless environment';
+        try {
+          if (language === 'javascript') {
+            const result = await execPromise(`node ${filepath}`, execOptions);
+            output = result.stdout + (result.stderr ? `\nError: ${result.stderr}` : '');
+          } else if (language === 'python') {
+            const result = await execPromise(`python ${filepath}`, execOptions);
+            output = result.stdout + (result.stderr ? `\nError: ${result.stderr}` : '');
+          } else {
+            output = 'Language not supported in serverless environment';
+          }
+        } catch (execError) {
+          output = `Execution Error: ${execError.message}\n${execError.stderr || ''}`;
+          throw new Error(output);
         }
         
         // Send output to client
@@ -99,14 +123,30 @@ const ioHandler = (req, res) => {
     
     socket.on('disconnect', () => {
       console.log('Client disconnected:', socket.id);
+      
+      // Clean up any temporary files if they exist
+      try {
+        const userTempDir = path.join(TEMP_DIR, socket.id);
+        if (fs.existsSync(userTempDir)) {
+          fs.rmSync(userTempDir, { recursive: true, force: true });
+        }
+      } catch (error) {
+        console.error('Error cleaning up temp files:', error);
+      }
+    });
+
+    // Handle errors
+    socket.on('error', (error) => {
+      console.error('Socket error:', error);
     });
   });
 
   // Make the socket.io instance available
   res.socket.server.io = io;
-  
-  // Handle the request
+
+  console.log('Socket.IO server initialized successfully');
   res.end();
 };
 
+// Export the handler
 export default ioHandler;

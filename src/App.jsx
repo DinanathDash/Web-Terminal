@@ -146,13 +146,18 @@ function App() {
   useEffect(() => {
     console.log(`Connecting to backend at: ${BACKEND_URL}`);
     
-    // For Vercel serverless deployment, we need to use the path option
+    // For Vercel serverless deployment configuration
     const newSocket = io(BACKEND_URL, {
+      path: '/socket.io',
       reconnectionDelayMax: 10000,
       reconnection: true,
-      reconnectionAttempts: 10,
-      path: '/socket.io',
-      transports: ['websocket', 'polling'],
+      reconnectionAttempts: 5,
+      transports: ['polling', 'websocket'], // Try polling first, then upgrade to websocket
+      upgrade: true,
+      rememberUpgrade: true,
+      timeout: 10000,
+      forceNew: true,
+      withCredentials: true
     });
 
     newSocket.on('connect', () => {
