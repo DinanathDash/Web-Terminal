@@ -23,6 +23,9 @@ import './themeColors.css';
 // Use environment variable or fallback to local server during development
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || window.location.origin;
 
+// Check if we're in a serverless environment (no websocket support)
+const isServerless = BACKEND_URL.includes('vercel.app') || import.meta.env.VITE_SERVERLESS === 'true';
+
 // Initial file structure for the explorer
 const initialFiles = {
   'README.md': { 
@@ -139,15 +142,33 @@ function App() {
   const [serverConnected, setServerConnected] = useState(false);
   const [connectionError, setConnectionError] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [isServerless, setIsServerless] = useState(BACKEND_URL.includes('vercel.app') || import.meta.env.VITE_SERVERLESS === 'true');
 
   // Get theme
   const theme = getVSCodeTheme();
   
-  // Initialize socket connection
+  // Initialize connection (socket or serverless)
   useEffect(() => {
     console.log(`Connecting to backend at: ${BACKEND_URL}`);
+    console.log(`Environment: ${isServerless ? 'Serverless' : 'WebSockets'}`);
     
-    // For Vercel serverless deployment configuration
+    // Check serverless readiness
+    if (isServerless) {
+      // In serverless mode, check if the API endpoint is available
+      axios.get(`${BACKEND_URL}/api/socket`)
+        .then(() => {
+          console.log('Connected to serverless backend');
+          setServerConnected(true);
+          setConnectionError(false);
+        })
+        .catch(error => {
+          console.error('Serverless connection error:', error);
+          setConnectionError(true);
+        });
+      return;
+    }
+    
+    // Standard WebSocket mode for development
     const newSocket = io(BACKEND_URL, {
       path: '/socket.io',
       transports: ['polling', 'websocket'], // Enable both polling and websocket
@@ -200,7 +221,7 @@ function App() {
     return () => {
       newSocket.close();
     };
-  }, []);
+  }, [isServerless, BACKEND_URL]);
 
   // Apply dark theme class on mount
   useEffect(() => {
@@ -311,7 +332,41 @@ function App() {
 
     console.log(`Executing code with language: ${currentLanguage} for file: ${currentFile}`);
 
-    if (socket && serverConnected) {
+    // Serverless mode execution
+    if (isServerless && serverConnected) {
+      try {
+        console.log('Executing in serverless mode');
+        const response = await axios.post(`${BACKEND_URL}/api/socket`, {
+          code: codeToRun,
+          language: currentLanguage
+        });
+        
+        const { status, output, error } = response.data;
+        
+        if (status === 'success') {
+          setOutput({
+            output: output || 'Execution complete',
+            error: !!error
+          });
+        } else {
+          setOutput({
+            output: `\r\n\x1b[31mError: ${error || 'Unknown error'}\x1b[0m\r\n`,
+            error: true
+          });
+        }
+        
+        setIsRunning(false);
+      } catch (err) {
+        console.error('Error executing code in serverless mode:', err);
+        setOutput({
+          output: `\r\n\x1b[31mError: ${err.response?.data?.error || err.message || 'Connection failed'}\x1b[0m\r\n`,
+          error: true
+        });
+        setIsRunning(false);
+      }
+    }
+    // WebSocket mode execution
+    else if (socket && serverConnected) {
       try {
         socket.emit('execute', {
           code: codeToRun,
@@ -328,7 +383,7 @@ function App() {
       }
     } else {
       setOutput({
-        output: `\r\n\x1b[31mError: ${language} execution requires server connection.\x1b[0m\r\n\x1b[33mTry reconnecting with the 'reconnect' command.\x1b[0m\r\n`,
+        output: `\r\n\x1b[31mError: ${currentLanguage} execution requires server connection.\x1b[0m\r\n\x1b[33mTry reconnecting with the 'reconnect' command.\x1b[0m\r\n`,
         error: true
       });
       setIsRunning(false);
@@ -356,8 +411,41 @@ function App() {
   const handleTerminalCommand = (command) => {
     if (!command || command.startsWith('_')) return;
 
-    if (command === 'reconnect' && socket) {
-      socket.connect();
+    if (command === 'reconnect') {
+      if (isServerless) {
+        // In serverless mode, check connection to API
+        axios.get(`${BACKEND_URL}/api/socket`)
+          .then(() => {
+            setServerConnected(true);
+            setConnectionError(false);
+            setOutput(prev => ({
+              output: `${prev.output}\r\n✅ Connected to serverless backend\r\n`,
+              error: false
+            }));
+          })
+          .catch(error => {
+            setConnectionError(true);
+            setOutput(prev => ({
+              output: `${prev.output}\r\n❌ Failed to connect: ${error.message}\r\n`,
+              error: true
+            }));
+          });
+      } else if (socket) {
+        socket.connect();
+      }
+    } else if (command === 'mode') {
+      // Toggle between serverless and WebSocket modes
+      setIsServerless(!isServerless);
+      setOutput(prev => ({
+        output: `${prev.output}\r\nSwitched to ${!isServerless ? 'serverless' : 'WebSocket'} mode. Please reconnect.\r\n`,
+        error: false
+      }));
+    } else if (command === 'status') {
+      // Show connection status
+      setOutput(prev => ({
+        output: `${prev.output}\r\nConnection Status: ${serverConnected ? '✅ Connected' : '❌ Disconnected'}\r\nMode: ${isServerless ? 'Serverless' : 'WebSocket'}\r\nBackend URL: ${BACKEND_URL}\r\n`,
+        error: false
+      }));
     }
   };
 
