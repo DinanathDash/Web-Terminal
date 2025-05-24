@@ -150,7 +150,7 @@ function App() {
     // For Vercel serverless deployment configuration
     const newSocket = io(BACKEND_URL, {
       path: '/socket.io',
-      transports: ['polling'], // Start with polling only
+      transports: ['polling', 'websocket'], // Enable both polling and websocket
       reconnectionDelayMax: 5000,
       reconnection: true,
       reconnectionAttempts: 10,

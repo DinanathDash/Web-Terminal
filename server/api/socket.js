@@ -56,16 +56,17 @@ const ioHandler = (req, res) => {
     path: '/socket.io',
     addTrailingSlash: false,
     cors: {
-      origin: '*',
-      methods: ['GET', 'POST'],
+      origin: process.env.FRONTEND_URL || '*',
+      methods: ['GET', 'POST', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true
     },
     transports: ['polling', 'websocket'],
     allowEIO3: true,
     perMessageDeflate: false,
     maxHttpBufferSize: 1e6,
-    pingTimeout: 60000,
-    pingInterval: 25000
+    pingTimeout: 30000,
+    pingInterval: 20000
   });
 
   // Socket.IO logic - simplified for serverless
